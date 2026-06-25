@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EGuardian Operations Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{--bg:#f8f7fa;--surface:#fff;--surface2:#f5f3fa;--surface3:#ede9f5;--border:#e5e0ef;--border2:#d4cce8;--accent:#5736AC;--accent2:#452989;--accent-bg:rgba(87,54,172,.08);--uae:#452989;--uae-l:rgba(69,41,137,.1);--mkt:#1a1a1a;--mkt-l:rgba(0,0,0,.06);--text:#000;--text2:#333;--text3:#666;--green:#0e9e6e;--green-l:rgba(14,158,110,.1);--yellow:#8a6500;--yellow-l:rgba(138,101,0,.1);--red:#c42b2b;--shadow:0 1px 4px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);--shadow-sm:0 1px 3px rgba(0,0,0,.05);--r:12px;--rs:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm)}
+.logo-wrap{display:flex;align-items:center}
+.logo-img{height:26px;width:auto;display:block;object-fit:contain}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.topbar-date{font-size:12px;color:var(--text3)}
+.clock{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);background:var(--surface2);padding:4px 10px;border-radius:6px;border:1px solid var(--border)}
+.nav{display:flex;gap:2px;padding:0 32px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto}
+.nav-tab{padding:12px 20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);border-bottom:2px solid transparent;transition:all .18s;white-space:nowrap;font-family:inherit;display:flex;align-items:center;gap:7px}
+.nav-tab:hover{color:var(--text2);background:var(--surface2)}
+.nav-tab.active[data-tab="india"]{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-tab.active[data-tab="uae"]{color:var(--uae);border-bottom-color:var(--uae)}
+.nav-tab.active[data-tab="mkt"]{color:var(--mkt);border-bottom-color:var(--mkt)}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.di{background:var(--accent)}.du{background:var(--uae)}.dm{background:var(--mkt)}
+.main{padding:24px 32px;max-width:1440px;margin:0 auto}
+.tab-content{display:none}.tab-content.active{display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;margin-bottom:24px}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);border-radius:3px 0 0 3px}
+.sc.u::after{background:var(--uae)}.sc.m::after{background:var(--mkt)}
+.sl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;color:var(--text3);margin-bottom:6px}
+.sv{font-size:26px;font-weight:800;font-family:'JetBrains Mono',monospace;letter-spacing:-1px;color:var(--text)}
+.sv.i{color:var(--accent2)}.sv.u{color:var(--uae)}.sv.m{color:var(--mkt)}.sv.sm{font-size:15px;font-weight:700;font-family:'Inter',sans-serif;padding-top:5px}
+.ss{font-size:11px;color:var(--text3);margin-top:3px}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.st{font-size:17px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.sbadge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:3px 9px;border-radius:20px}
+.bi{background:var(--accent-bg);color:var(--accent2)}.bu{background:var(--uae-l);color:var(--uae)}.bm{background:var(--mkt-l);color:var(--mkt)}
+.srcl{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text3);text-decoration:none;padding:5px 10px;border:1px solid var(--border);border-radius:6px;transition:all .15s;display:inline-flex;align-items:center;gap:4px;background:var(--surface)}
+.srcl:hover{color:var(--accent);border-color:var(--accent)}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:24px}
+.ph{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface2)}
+.pht{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text2)}
+.cnt{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface);border:1px solid var(--border);padding:2px 8px;border-radius:20px;color:var(--text3)}
+.pban{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--rs);padding:14px 18px;margin-bottom:18px;gap:12px;flex-wrap:wrap;box-shadow:var(--shadow-sm)}
+.pban.u{border-left-color:var(--uae)}
+.pbi{display:flex;align-items:center;gap:12px}
+.pbt strong{display:block;font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.pbt span{font-size:12px;color:var(--text3)}
+.btnp{padding:8px 16px;background:var(--accent);border:none;border-radius:var(--rs);color:#fff;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:all .15s;font-family:inherit;white-space:nowrap}
+.btnp:hover{background:var(--accent2)}.btnp.u{background:var(--uae)}.btnp.u:hover{background:var(--accent2)}
+.leads{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.lc{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:16px;box-shadow:var(--shadow-sm);transition:box-shadow .15s,border-color .15s}
+.lc:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.lct{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.lav{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.lav.u{background:linear-gradient(135deg,var(--uae),#2e1a5c)}
+.ln{font-size:14px;font-weight:700;color:var(--text)}.lt{font-size:11px;color:var(--text3);margin-top:2px}.lco{font-size:12px;color:var(--text2);margin-top:4px}
+.badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+.bg{background:var(--green-l);color:var(--green);border:1px solid rgba(14,158,110,.25)}
+.bb{background:var(--accent-bg);color:var(--accent);border:1px solid rgba(87,54,172,.25)}
+.by{background:var(--yellow-l);color:var(--yellow);border:1px solid rgba(192,138,0,.25)}
+.lmr{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+.lmi{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px}
+.lmi a{color:var(--accent);text-decoration:none}.lmi a:hover{text-decoration:underline}
+.exb{font-size:11px;color:var(--text3);margin-top:10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:none;border:none;padding:0;font-family:inherit;font-weight:500;transition:color .15s}
+.exb:hover{color:var(--accent)}
+.ld{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.ld.open{display:block}
+.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.dk{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:3px;font-weight:700}
+.dv{font-size:12px;color:var(--text2);word-break:break-all}.dv a{color:var(--accent);text-decoration:none}.dv a:hover{text-decoration:underline}
+.dnote{margin-top:12px;padding:10px 14px;background:var(--yellow-l);border-left:3px solid var(--yellow);border-radius:0 6px 6px 0;font-size:12px;color:var(--text2);font-style:italic}
+.dcom{margin-top:8px;padding:10px 14px;background:var(--green-l);border-left:3px solid var(--green);border-radius:0 6px 6px 0;font-size:12px;color:var(--text2)}
+.dca{font-size:10px;color:var(--text3);margin-bottom:3px;font-weight:700}
+.tscroll{overflow-x:auto}
+.dt{width:100%;border-collapse:collapse;font-size:12px}
+.dt th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap}
+.dt td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.dt tr:last-child td{border-bottom:none}.dt tr:hover td{background:var(--surface2)}
+.dt td a{color:var(--accent);text-decoration:none;font-size:11px}.dt td a:hover{text-decoration:underline}
+.tdn{color:var(--text);font-weight:600}.tmn{font-family:'JetBrains Mono',monospace;font-size:11px}.rn{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);text-align:right;width:32px}
+.sd{background:var(--green-l);color:var(--green);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.sr{background:var(--yellow-l);color:var(--yellow);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.st2{background:var(--surface3);color:var(--text3);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;border:1px solid var(--border)}
+.sg{background:var(--accent-bg);color:var(--accent2);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.p1{color:var(--red);font-weight:700;font-size:10px;text-transform:uppercase}
+.p2{color:var(--yellow);font-weight:700;font-size:10px;text-transform:uppercase}
+.div{border:none;border-top:1px solid var(--border);margin:24px 0}
+.slc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:start;box-shadow:var(--shadow-sm);margin-bottom:24px}
+.slav{width:52px;height:52px;background:linear-gradient(135deg,var(--uae),#2e1a5c);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff}
+.slname{font-size:19px;font-weight:800;color:var(--text)}.slpos{font-size:12px;color:var(--text3);margin-top:3px}.slco{font-size:13px;color:var(--uae);margin-top:3px;font-weight:600}
+.slf{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px;margin-top:16px}
+.sfk{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:3px;font-weight:700}
+.sfv{font-size:13px;color:var(--text)}.sfv a{color:var(--uae);text-decoration:none}.sfv a:hover{text-decoration:underline}
+.geo{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;background:var(--uae-l);color:var(--uae);border:1px solid rgba(69,41,137,.25)}
+.ctabs{display:flex;gap:0;padding:12px 16px 0;border-bottom:1px solid var(--border);background:var(--surface2)}
+.ctab{padding:7px 16px;font-size:11px;font-weight:600;cursor:pointer;border-radius:6px 6px 0 0;color:var(--text3);background:none;border:none;font-family:inherit;transition:all .15s}
+.ctab.active{color:var(--mkt);background:var(--surface);border:1px solid var(--border);border-bottom:1px solid var(--surface)}
+.ctab:hover:not(.active){color:var(--text2);background:var(--border)}
+.cpanel{display:none}.cpanel.active{display:block}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--surface2)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+@media(max-width:700px){.slc{grid-template-columns:1fr}.main{padding:16px}.topbar,.nav{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo-wrap"><img src="https://nexuses.s3.us-east-2.amazonaws.com/egurdian_2__1__1782378247843_qblk.png" alt="EGuardian" class="logo-img"></div>
+  <div class="topbar-right"><span class="topbar-date">May 2026</span><span class="clock" id="clk">--:--:--</span></div>
+</div>
+<div class="nav">
+  <button class="nav-tab active" data-tab="india" onclick="sw('india')"><span class="dot di"></span>EGuardian India</button>
+  <button class="nav-tab" data-tab="uae" onclick="sw('uae')"><span class="dot du"></span>EGuardian UAE</button>
+  <button class="nav-tab" data-tab="mkt" onclick="sw('mkt')"><span class="dot dm"></span>EGuardian Marketing</button>
+</div>
+
+<!-- INDIA -->
+<div id="tab-india" class="tab-content active"><div class="main">
+<div class="stats">
+  <div class="sc"><div class="sl">Pipeline Leads</div><div class="sv i">4</div><div class="ss">All Meeting Done</div></div>
+  <div class="sc"><div class="sl">Solution</div><div class="sv i sm">Brand Defense</div><div class="ss">All 4 leads</div></div>
+  <div class="sc"><div class="sl">Webinar Registrants</div><div class="sv i">82</div><div class="ss">Register tab</div></div>
+  <div class="sc"><div class="sl">Industries Covered</div><div class="sv i">3</div><div class="ss">Mfg · Finance · IT</div></div>
+  <div class="sc"><div class="sl">Latest Lead</div><div class="sv i sm">May 27, 2026</div><div class="ss">Abhijit Moharir</div></div>
+</div>
+<div class="sh"><div class="st">Pipeline <span class="sbadge bi">4 Leads · Meeting Done</span></div><a class="srcl" href="https://nexuseshiring.notion.site/Eguardian-India-Pipeline-3266947358fa800e9223f28c5e311b57?p=36d6947358fa805cbebacc244eb384d3&pm=s" target="_blank">↗ Notion Pipeline</a></div>
+<div class="pban">
+  <div class="pbi"><span style="font-size:20px">🔗</span><div class="pbt"><strong>Eguardian India Pipeline — Notion</strong><span>4 active leads · Brand Defense · All at Meeting Done status</span></div></div>
+  <a class="btnp" href="https://nexuseshiring.notion.site/Eguardian-India-Pipeline-3266947358fa800e9223f28c5e311b57?p=36d6947358fa805cbebacc244eb384d3&pm=s" target="_blank">↗ View Pipeline</a>
+</div>
+<div class="leads">
+<div class="lc"><div class="lct"><div class="lav">JS</div><div><div class="ln">Jaspher Soundararaj</div><div class="lt">IT Manager · End to End IT Operations Specialist</div><div class="lco">🏢 Jersey Engineering Solutions · Tamil Nādu</div></div><span class="badge bg">Meeting Done</span></div>
+<div class="lmr"><span class="lmi">📅 Lead: May 15 · Meeting: May 18, 2026</span><span class="lmi">🔵 Brand Defense</span><span class="lmi"><a href="https://www.linkedin.com/in/jaspher-soundararaj-876097b/" target="_blank">LinkedIn ↗</a></span><span class="lmi"><a href="https://www.linkedin.com/company/jersey-engineering-solutions-private-limited/" target="_blank">Company ↗</a></span></div>
+<button class="exb" onclick="ex('d1',this)">▼ Show Details</button>
+<div class="ld" id="d1"><div class="dg"><div><div class="dk">Email</div><div class="dv"><a href="mailto:jaspher@jerseyeng.com">jaspher@jerseyeng.com</a></div></div><div><div class="dk">Lead Date</div><div class="dv">May 15, 2026</div></div><div><div class="dk">Meeting Date</div><div class="dv">May 18, 2026</div></div><div><div class="dk">Last Followup</div><div class="dv">May 18, 2026</div></div><div><div class="dk">Company HQ</div><div class="dv">Tamil Nādu</div></div><div><div class="dk">Industry</div><div class="dv">—</div></div><div><div class="dk">Solution</div><div class="dv">Brand Defense</div></div><div><div class="dk">Phone</div><div class="dv">—</div></div></div>
+<div class="dnote">📌 Followup (18/5/26): He wants to connect today between 3:00 PM to 5:00 PM</div>
+<div class="dcom"><div class="dca">💬 Shreya Srivastava · Jun 3</div>Call went well — he has shown interest</div></div></div>
+
+<div class="lc"><div class="lct"><div class="lav">VG</div><div><div class="ln">Vipil Gupta</div><div class="lt">AVP – IT Security and Processes</div><div class="lco">🏢 Indian Hotels Co. Ltd (IHCL Tata)</div></div><span class="badge bg">Meeting Done</span></div>
+<div class="lmr"><span class="lmi">📅 Lead: May 18 · Meeting: May 21, 2026</span><span class="lmi">🔵 Brand Defense</span><span class="lmi"><a href="https://www.linkedin.com/in/vipilgupta/" target="_blank">LinkedIn ↗</a></span></div>
+<button class="exb" onclick="ex('d2',this)">▼ Show Details</button>
+<div class="ld" id="d2"><div class="dg"><div><div class="dk">Email</div><div class="dv"><a href="mailto:vipil.gupta@ihcltata.com">vipil.gupta@ihcltata.com</a></div></div><div><div class="dk">Lead Date</div><div class="dv">May 18, 2026</div></div><div><div class="dk">Meeting Date</div><div class="dv">May 21, 2026</div></div><div><div class="dk">Last Followup</div><div class="dv">May 18, 2026</div></div><div><div class="dk">Industry</div><div class="dv">—</div></div><div><div class="dk">Solution</div><div class="dv">Brand Defense</div></div></div>
+<div class="dnote">📌 Followup (19/5/26): He wants to connect tomorrow at 12:00 PM.</div></div></div>
+
+<div class="lc"><div class="lct"><div class="lav">PK</div><div><div class="ln">Pratik Kadam</div><div class="lt">Chief Information Security Officer</div><div class="lco">🏢 GICHF · Financial Services</div></div><span class="badge bg">Meeting Done</span></div>
+<div class="lmr"><span class="lmi">📅 Lead: May 22 · Meeting: May 27, 2026</span><span class="lmi">🔵 Brand Defense</span><span class="lmi"><a href="https://www.linkedin.com/in/pratik-kadam-6b9a1834/" target="_blank">LinkedIn ↗</a></span><span class="lmi"><a href="https://sankalp.gichf.com/SankalpOnlineJourney.aspx" target="_blank">Website ↗</a></span></div>
+<button class="exb" onclick="ex('d3',this)">▼ Show Details</button>
+<div class="ld" id="d3"><div class="dg"><div><div class="dk">Email</div><div class="dv"><a href="mailto:pratik.kadam@gichf.com">pratik.kadam@gichf.com</a></div></div><div><div class="dk">Lead Date</div><div class="dv">May 22, 2026</div></div><div><div class="dk">Meeting Date</div><div class="dv">May 27, 2026</div></div><div><div class="dk">Last Followup</div><div class="dv">May 27, 2026</div></div><div><div class="dk">Industry</div><div class="dv">Financial Services</div></div><div><div class="dk">Solution</div><div class="dv">Brand Defense</div></div></div>
+<div class="dnote">📌 Followup (27/5/26): He wants to connect on Monday at 5:00 PM</div></div></div>
+
+<div class="lc"><div class="lct"><div class="lav">AM</div><div><div class="ln">Abhijit Moharir</div><div class="lt">Group Chief Information Officer</div><div class="lco">🏢 Kalyani Group · Manufacturing</div></div><span class="badge bg">Meeting Done</span></div>
+<div class="lmr"><span class="lmi">📅 Lead: May 26 · Meeting: May 27, 2026</span><span class="lmi">🔵 Brand Defense</span><span class="lmi"><a href="https://www.linkedin.com/in/abhijit-moharir-6291274/" target="_blank">LinkedIn ↗</a></span><span class="lmi"><a href="https://www.kalyanisteels.com/about-us/kalyani-group/" target="_blank">Website ↗</a></span></div>
+<button class="exb" onclick="ex('d4',this)">▼ Show Details</button>
+<div class="ld" id="d4"><div class="dg"><div><div class="dk">Email</div><div class="dv"><a href="mailto:abhijit.moharir@kalyani.in">abhijit.moharir@kalyani.in</a></div></div><div><div class="dk">Lead Date</div><div class="dv">May 26, 2026</div></div><div><div class="dk">Meeting Date</div><div class="dv">May 27, 2026</div></div><div><div class="dk">Last Followup</div><div class="dv">May 27, 2026</div></div><div><div class="dk">Industry</div><div class="dv">Manufacturing</div></div><div><div class="dk">Solution</div><div class="dv">Brand Defense</div></div></div>
+<div class="dnote">📌 Followup (27/5/26): New Brand Defense Lead — connect tomorrow at 2:00 PM</div></div></div>
+</div>
+
+<hr class="div">
+<div class="sh"><div class="st">Webinar Registrants <span class="sbadge bi">Register Tab · 82 entries</span></div><a class="srcl" href="https://docs.google.com/spreadsheets/d/1ciHFKDEk4Ojocoj0jY9hXlUFLispUgQuDRz5OvWmba4/edit?gid=1206495847#gid=1206495847" target="_blank">↗ Open Sheet</a></div>
+<div class="panel"><div class="ph"><span class="pht">🇮🇳 India Webinar — Registrants</span><span class="cnt" id="indiaCnt">82 total</span></div>
+<div class="tscroll"><table class="dt"><thead><tr><th class="rn">#</th><th>Name</th><th>Position</th><th>Company</th><th>Email</th><th>Website</th><th>LinkedIn</th><th>RSVP</th></tr></thead><tbody id="ireg"></tbody></table></div></div>
+</div></div>
+
+<!-- UAE -->
+<div id="tab-uae" class="tab-content"><div class="main">
+<div class="stats">
+  <div class="sc u"><div class="sl">Pipeline Leads</div><div class="sv u">1</div><div class="ss">Meeting Done</div></div>
+  <div class="sc u"><div class="sl">Solution</div><div class="sv u sm">Liberty91</div><div class="ss">Active lead</div></div>
+  <div class="sc u"><div class="sl">Geography</div><div class="sv u sm">Saudi 🇸🇦</div><div class="ss">Lean Business Services</div></div>
+  <div class="sc u"><div class="sl">Webinar Attendees</div><div class="sv u">41</div><div class="ss">Attendees tab</div></div>
+  <div class="sc u"><div class="sl">Meeting Date</div><div class="sv u sm">May 21, 2026</div><div class="ss">Faisal Alaskar</div></div>
+</div>
+<div class="sh"><div class="st">Pipeline <span class="sbadge bu">1 Lead · Meeting Done</span></div><a class="srcl" href="https://nexusesonline.notion.site/22d6947358fa80eeb10fe8d5dce407e6?v=22d6947358fa80bca3db000ca97b9d03&p=35a6947358fa801f9af1de427930f5c0&pm=s" target="_blank">↗ Notion Pipeline</a></div>
+<div class="pban u"><div class="pbi"><span style="font-size:20px">🔗</span><div class="pbt"><strong>Eguardian UAE Pipeline — Notion</strong><span>1 active lead · Liberty91 solution · Meeting Done</span></div></div><a class="btnp u" href="https://nexusesonline.notion.site/22d6947358fa80eeb10fe8d5dce407e6?v=22d6947358fa80bca3db000ca97b9d03&p=35a6947358fa801f9af1de427930f5c0&pm=s" target="_blank">↗ View Pipeline</a></div>
+<div class="slc">
+  <div class="slav">FA</div>
+  <div><div class="slname">Faisal Alaskar</div><div class="slpos">IT Architecture Associate Director</div><div class="slco">Lean Business Services <span class="geo">🇸🇦 Saudi</span></div>
+  <div class="slf">
+    <div><div class="sfk">Email</div><div class="sfv"><a href="mailto:f.alasker@lean.sa">f.alasker@lean.sa</a></div></div>
+    <div><div class="sfk">Phone</div><div class="sfv">+966 558 000 905</div></div>
+    <div><div class="sfk">Lead Date</div><div class="sfv">May 15, 2026</div></div>
+    <div><div class="sfk">Meeting Date</div><div class="sfv">May 21, 2026</div></div>
+    <div><div class="sfk">Last Followup</div><div class="sfv">May 21, 2026</div></div>
+    <div><div class="sfk">Solution</div><div class="sfv">Liberty91</div></div>
+    <div><div class="sfk">Status</div><div class="sfv"><span class="badge bg">Meeting Done</span></div></div>
+    <div><div class="sfk">Website</div><div class="sfv"><a href="https://lean.sa/" target="_blank">lean.sa ↗</a></div></div>
+    <div><div class="sfk">LinkedIn</div><div class="sfv"><a href="http://www.linkedin.com/in/faisal-k-alaskar" target="_blank">View Profile ↗</a></div></div>
+    <div><div class="sfk">Notes</div><div class="sfv">—</div></div>
+  </div></div>
+  <span class="badge bg" style="align-self:flex-start;">Meeting Done</span>
+</div>
+<hr class="div">
+<div class="sh"><div class="st">RSM UAE Webinar — Attendees <span class="sbadge bu">Attendees Tab · 41 entries</span></div><a class="srcl" href="https://docs.google.com/spreadsheets/d/1ZfKDCA-KlZlkulKB0xwLCOhSK2db9OoUdq-WB2qom-E/edit?gid=1561406423#gid=1561406423" target="_blank">↗ Open Sheet</a></div>
+<div class="panel"><div class="ph"><span class="pht">🇦🇪 RSM UAE Webinar — Attendees</span><span class="cnt">41 attendees</span></div>
+<div class="tscroll"><table class="dt"><thead><tr><th class="rn">#</th><th>Name</th><th>Position</th><th>Company</th><th>Email</th><th>Phone</th><th>LinkedIn</th><th>Join Time</th><th>Contact</th><th>Notes</th></tr></thead><tbody id="uatt"></tbody></table></div></div>
+</div></div>
+
+<!-- MARKETING -->
+<div id="tab-mkt" class="tab-content"><div class="main">
+<div class="stats">
+  <div class="sc m"><div class="sl">May Tasks</div><div class="sv m">16</div><div class="ss">All Done</div></div>
+  <div class="sc m"><div class="sl">Content Regions</div><div class="sv m">3</div><div class="ss">Global · India · UAE</div></div>
+  <div class="sc m"><div class="sl">India Cal Posts</div><div class="sv m">10</div><div class="ss">May — Posted + Planned</div></div>
+  <div class="sc m"><div class="sl">UAE/Global Posts</div><div class="sv m">17</div><div class="ss">May — all Posted</div></div>
+</div>
+<div class="sh"><div class="st">May Marketing Tasks <span class="sbadge bm">May Task Tab</span></div><a class="srcl" href="https://docs.google.com/spreadsheets/d/1lHX6cietn34slKXSn0g_uwGgNx-G16ArdKY528rBy3Q/edit?gid=1124139994#gid=1124139994" target="_blank">↗ Open Sheet</a></div>
+<div class="panel"><div class="ph"><span class="pht">📋 May Tasks</span><span class="cnt">16 tasks · all done</span></div>
+<div class="tscroll"><table class="dt"><thead><tr><th class="rn">#</th><th>Task</th><th>Owner</th><th>Priority</th><th>Due Date</th><th>Status</th><th>Link / File</th></tr></thead><tbody>
+<tr><td class="rn">1</td><td class="tdn">Forward event — Corporate Video Storyboard</td><td>Sanjeev</td><td><span class="p1">P1</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">EGUARDIAN - New Corporate video Script</td></tr>
+<tr><td class="rn">2</td><td class="tdn">Forward event — Corporate Video Production</td><td>Sanjeev · Saanu</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">Eguardian New Corporate Video - May 2026.mp4</td></tr>
+<tr><td class="rn">3</td><td class="tdn">Content Calendar — May</td><td>Sanjeev</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">Social Calendar May 2026 - Region wise</td></tr>
+<tr><td class="rn">4</td><td class="tdn">Brandefense Webinar Awareness Posts</td><td>Sanjeev · Soumya</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">Brandefense posts</td></tr>
+<tr><td class="rn">5</td><td class="tdn">Brandefense Webinar AI Invite Video</td><td>Sanjeev · Soumya</td><td><span class="p1">P1</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">AI invite video.mp4</td></tr>
+<tr><td class="rn">6</td><td class="tdn">Website Homepage — Content Revamp</td><td>Sanjeev</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td><a href="https://eguardian.com/" target="_blank">eguardian.com ↗</a></td></tr>
+<tr><td class="rn">7</td><td class="tdn">Inventic Webinar Posts</td><td>Sanjeev · Soumya</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">Inventic Webinar</td></tr>
+<tr><td class="rn">8</td><td class="tdn">Inventic Webinar Video</td><td>Sanjeev · Soumya</td><td><span class="p2">P2</span></td><td>5 Jun 2026</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">Inventic Nitin video.mp4 · display over text</td></tr>
+<tr><td class="rn">9</td><td class="tdn">Zoho Contracts — Videos</td><td>Sanjeev · Soumya</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">Zoho Contract Videos</td></tr>
+<tr><td class="rn">10</td><td class="tdn">Brandefense Webinar — Quiz Form</td><td>Sanjeev</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td><a href="https://form.jotform.com/261302075689460" target="_blank">JotForm ↗</a></td></tr>
+<tr><td class="rn">11</td><td class="tdn">Inventic Webinar Deck</td><td>Sanjeev</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">Inventic_Eguardian_Webinar_updated.pdf</td></tr>
+<tr><td class="rn">12</td><td class="tdn">Eid Post</td><td>Sanjeev</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">Eid al Adha Eguardian - May 2026.png</td></tr>
+<tr><td class="rn">13</td><td class="tdn">Eid Emailer</td><td>Sanjeev</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">EIDALADHA Greetings emailer.html</td></tr>
+<tr><td class="rn">14</td><td class="tdn">Vesak Post</td><td>Sanjeev</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">_Eguardian Vesak poya post May 2026.png</td></tr>
+<tr><td class="rn">15</td><td class="tdn">Vesak Emailer</td><td>Sanjeev</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">Vesakgreeting.html</td></tr>
+<tr><td class="rn">16</td><td class="tdn">PRTG Webinar Banner</td><td>Sanjeev</td><td><span class="p2">P2</span></td><td>—</td><td><span class="sd">Done</span></td><td style="font-size:11px;color:var(--text3)">PRTG webinar</td></tr>
+</tbody></table></div></div>
+
+<hr class="div">
+<div class="sh"><div class="st">Content Calendar <span class="sbadge bm">Global · India · UAE</span></div><a class="srcl" href="https://docs.google.com/spreadsheets/d/1ZuuxYLsMSO_YRTHA7dKT_RvgP0u6U4BR4EsRuN_5eFQ/edit?gid=0#gid=0" target="_blank">↗ Open Sheet</a></div>
+<div class="panel">
+<div class="ctabs">
+  <button class="ctab active" onclick="sc('cg',this)">🌐 Global</button>
+  <button class="ctab" onclick="sc('ci',this)">🇮🇳 India</button>
+  <button class="ctab" onclick="sc('cu',this)">🇦🇪 UAE</button>
+</div>
+<div class="cpanel active" id="cg"><div class="tscroll"><table class="dt"><thead><tr><th>#</th><th>Date</th><th>Theme / Content</th><th>Description</th><th>Status</th><th>Live Link</th></tr></thead><tbody>
+<tr><td class="rn">1</td><td class="tmn">1 May</td><td class="tdn">Labour Day</td><td style="font-size:11px;color:var(--text3)">International Labour Day celebration</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7455854122165239808" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">2</td><td class="tmn">1 May</td><td class="tdn">Vesak</td><td style="font-size:11px;color:var(--text3)">Vesak Poya Day / Buddha Purnima</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7455855257978519553" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">3</td><td class="tmn">5 May</td><td class="tdn">Brandefense Webinar — 7 Days to Go</td><td style="font-size:11px;color:var(--text3)">Countdown post</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7457303307347320832" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">4</td><td class="tmn">5 May</td><td class="tdn">ESET Carousel</td><td style="font-size:11px;color:var(--text3)">Change Healthcare breach — endpoint security</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7457315658360446976" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">5</td><td class="tmn">7 May</td><td class="tdn">Zoho Bigin — Users &amp; Roles</td><td style="font-size:11px;color:var(--text3)">How-to video on access management</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7458051453748764672" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">6</td><td class="tmn">7 May</td><td class="tdn">Inventic Webinar — Awareness Post 1</td><td style="font-size:11px;color:var(--text3)">AML alert fatigue · 99% false positives</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7458046821375021056" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">7</td><td class="tmn">9 May</td><td class="tdn">Inventic Webinar — Awareness Post 2</td><td style="font-size:11px;color:var(--text3)">Compliance stack broken — systems problem</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7458752767109611520" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">8</td><td class="tmn">11 May</td><td class="tdn">Webinar Poll 1</td><td style="font-size:11px;color:var(--text3)">AML alert fatigue poll</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7459543468936437760" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">9</td><td class="tmn">12 May</td><td class="tdn">Inventic Webinar — Awareness Post 3</td><td style="font-size:11px;color:var(--text3)">$5.9B fraud loss — speed of insight</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7459851381521399808" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">10</td><td class="tmn">13 May</td><td class="tdn">Inventic Webinar — Countdown 7 Days</td><td style="font-size:11px;color:var(--text3)">Intelligence-led compliance</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7460197164409913344" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">11</td><td class="tmn">15 May</td><td class="tdn">Zoho Bigin — Company Settings</td><td style="font-size:11px;color:var(--text3)">How-to video on CRM company config</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7460945978930597890" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">12</td><td class="tmn">15 May</td><td class="tdn">Webinar Poll 2</td><td style="font-size:11px;color:var(--text3)">Audit readiness poll</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7460942658392338432" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">13</td><td class="tmn">17 May</td><td class="tdn">Inventic Webinar — Countdown 3 Days</td><td style="font-size:11px;color:var(--text3)">Live KYC/KYB walkthrough preview</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7461673636089745408" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">14</td><td class="tmn">18 May</td><td class="tdn">Inventic Webinar — Speaker Post</td><td style="font-size:11px;color:var(--text3)">Panel: Priyam Mandal · Somil S. · Nitin Purwar</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7462111358017441793" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">15</td><td class="tmn">19 May</td><td class="tdn">Inventic Webinar — Countdown 1 Day</td><td style="font-size:11px;color:var(--text3)">Tomorrow · last chance to register</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7462389098373230592" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">16</td><td class="tmn">20 May</td><td class="tdn">Inventic Webinar — Thank You Post</td><td style="font-size:11px;color:var(--text3)">Post-webinar wrap · onboarding &lt;3 min demo</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7462824383288356864" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">17</td><td class="tmn">21 May</td><td class="tdn">Zoho Bigin — Stage Automation</td><td style="font-size:11px;color:var(--text3)">Pipeline stage automation how-to</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7462827816955457536" target="_blank">LinkedIn ↗</a></td></tr>
+</tbody></table></div></div>
+
+<div class="cpanel" id="ci"><div class="tscroll"><table class="dt"><thead><tr><th>#</th><th>Date</th><th>Content</th><th>Description</th><th>Status</th></tr></thead><tbody>
+<tr><td class="rn">1</td><td class="tmn">5 May</td><td class="tdn">Brandefense Webinar — Countdown 7 Days</td><td style="font-size:11px;color:var(--text3)">7 days to go countdown post</td><td><span class="sd">Posted</span></td></tr>
+<tr><td class="rn">2</td><td class="tmn">5/7 May</td><td class="tdn">Brandefense Webinar — Poll 0</td><td style="font-size:11px;color:var(--text3)">Pre-webinar awareness poll</td><td><span class="sd">Posted</span></td></tr>
+<tr><td class="rn">3</td><td class="tmn">7 May</td><td class="tdn">Brandefense Webinar — Poll 1</td><td style="font-size:11px;color:var(--text3)">Engagement poll</td><td><span class="sd">Posted</span></td></tr>
+<tr><td class="rn">4</td><td class="tmn">8 May</td><td class="tdn">Brandefense Webinar — AI Invite Video</td><td style="font-size:11px;color:var(--text3)">AI-generated invite video post</td><td><span class="sd">Posted</span></td></tr>
+<tr><td class="rn">5</td><td class="tmn">9 May</td><td class="tdn">Brandefense Webinar — Countdown 3 Days</td><td style="font-size:11px;color:var(--text3)">3 days to go</td><td><span class="sd">Posted</span></td></tr>
+<tr><td class="rn">6</td><td class="tmn">11 May</td><td class="tdn">Brandefense Webinar — Countdown 1 Day</td><td style="font-size:11px;color:var(--text3)">1 day to go — last chance</td><td><span class="sd">Posted</span></td></tr>
+<tr><td class="rn">7</td><td class="tmn">12 May</td><td class="tdn">Brandefense Webinar — Thank You Post</td><td style="font-size:11px;color:var(--text3)">Post-webinar wrap up</td><td><span class="sd">Posted</span></td></tr>
+<tr><td class="rn">8</td><td class="tmn">18 May</td><td class="tdn">Scrut and GRC</td><td style="font-size:11px;color:var(--text3)">GRC / Scrut awareness content</td><td><span class="st2">Planned</span></td></tr>
+<tr><td class="rn">9</td><td class="tmn">19 May</td><td class="tdn">Brandefense &amp; Dark Web Monitoring</td><td style="font-size:11px;color:var(--text3)">External Attack Surface Monitoring post</td><td><span class="st2">Planned</span></td></tr>
+<tr><td class="rn">10</td><td class="tmn">20 May</td><td class="tdn">Post TBD</td><td style="font-size:11px;color:var(--text3)">Content to be confirmed</td><td><span class="st2">Planned</span></td></tr>
+</tbody></table></div></div>
+
+<div class="cpanel" id="cu"><div class="tscroll"><table class="dt"><thead><tr><th>#</th><th>Date</th><th>Content</th><th>Description</th><th>Status</th><th>Live Link</th></tr></thead><tbody>
+<tr><td class="rn">1</td><td class="tmn">7 May</td><td class="tdn">Inventic Webinar — Awareness Post 1</td><td style="font-size:11px;color:var(--text3)">AML 99% false positives</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7458046821375021056" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">2</td><td class="tmn">9 May</td><td class="tdn">Inventic Webinar — Awareness Post 2</td><td style="font-size:11px;color:var(--text3)">Compliance stack broken</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7458752767109611520" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">3</td><td class="tmn">11 May</td><td class="tdn">Webinar Poll 1</td><td style="font-size:11px;color:var(--text3)">AML alert fatigue poll</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7459543468936437760" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">4</td><td class="tmn">12 May</td><td class="tdn">Inventic Webinar — Awareness Post 3</td><td style="font-size:11px;color:var(--text3)">$5.9B fraud — speed of insight</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7459851381521399808" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">5</td><td class="tmn">13 May</td><td class="tdn">Inventic Webinar — Countdown 7 Days</td><td style="font-size:11px;color:var(--text3)">7 days countdown</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7460197164409913344" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">6</td><td class="tmn">15 May</td><td class="tdn">Webinar Poll 2</td><td style="font-size:11px;color:var(--text3)">Audit readiness poll</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7460942658392338432" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">7</td><td class="tmn">17 May</td><td class="tdn">Inventic Webinar — Countdown 3 Days</td><td style="font-size:11px;color:var(--text3)">3 days · live walkthrough preview</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7461673636089745408" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">8</td><td class="tmn">18 May</td><td class="tdn">Inventic Webinar — Speaker Post</td><td style="font-size:11px;color:var(--text3)">Panel announcement</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7462111358017441793" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">9</td><td class="tmn">19 May</td><td class="tdn">Inventic Webinar — Countdown 1 Day</td><td style="font-size:11px;color:var(--text3)">Tomorrow — last call</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7462389098373230592" target="_blank">LinkedIn ↗</a></td></tr>
+<tr><td class="rn">10</td><td class="tmn">20 May</td><td class="tdn">Inventic Webinar — Thank You Post</td><td style="font-size:11px;color:var(--text3)">Post-webinar wrap · demo recap</td><td><span class="sd">Posted</span></td><td><a href="https://www.linkedin.com/feed/update/urn:li:activity:7462824383288356864" target="_blank">LinkedIn ↗</a></td></tr>
+</tbody></table></div></div>
+</div>
+</div></div>
+
+<script>
+function sw(t){document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');document.querySelector('.nav-tab[data-tab="'+t+'"]').classList.add('active')}
+function ex(id,btn){const e=document.getElementById(id);const o=e.classList.toggle('open');btn.textContent=o?'▲ Hide Details':'▼ Show Details'}
+function sc(id,btn){document.querySelectorAll('.cpanel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active')}
+setInterval(()=>{document.getElementById('clk').textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'})},1000);
+
+const IR=[
+["Jayantha Hathurusinghe","Solutions Engineer","ATG","jayanthah@atg-glovesolutions.com","atg-glovesolutions.com","https://www.linkedin.com/in/jayantha-hathurusinghe-5a209210b/",""],
+["VIKAS GUPTA","VP & CIO","BAJEL PROJECTS","vikas.gupta@bajelprojects.com","bajelprojects.com","https://www.linkedin.com/in/vikas-gupta-85375912/",""],
+["MD SHAHIDULLAH","Head of Cyber Security","Betopia Limited","shahidullah@betopialimited.com","betopialimited.com","https://www.linkedin.com/in/shahidbd/",""],
+["Rahul Kashiramka","Sales Manager","binaryglobal","rahul.kashiramka@binaryglobal.com","binaryglobal.com","https://www.linkedin.com/in/rahul-kashiramka/",""],
+["Chathura Jayarathne","System Engineer","BOI","chathurak@boi.lk","boi.lk","https://www.linkedin.com/in/chathura-jayarathne-24084a24a/",""],
+["Khondoker Tanbir Ahmmed","Executive, Cyber Security","BRACNet Limited","tanbir.ahmmed@bracmail.net","bracmail.net","https://www.linkedin.com/in/ktahmmed/",""],
+["Sohayel Arman Joardar","Manager-Presales","BRACNet Ltd.","sohayel.joardar@bracmail.net","bracmail.net","https://www.linkedin.com/in/sohayelarman/",""],
+["Mohammad Ismail Hossain","Manager, Data Analytics","Bracnet Limited","ismail@bracmail.net","bracmail.net","https://www.linkedin.com/in/ihfarid/",""],
+["Yusuf Naeem","Sales Manager","Cloudofin","yusuf@cloudofin.com","cloudofin.com","https://www.linkedin.com/in/yusufnaeem/",""],
+["Suvadip Ghosh","Security Analyst","Workmates","ghoshsuvadip02@gmail.com","cloudworkmates.com","",""],
+["Chandra Pal Singh Chauhan","Security Analyst","Workmates","anurudrathakur42@gmail.com","cloudworkmates.com","",""],
+["Mohit Verma","","Workmates Core2Cloud","mohit.v@cloudworkmates.com","cloudworkmates.com","",""],
+["Sanjeev S","Cybersecurity Engineer","Cyberintelsys Consulting","sanjeev@cyberintelsys.com","cyberintelsys.com","https://www.linkedin.com/in/-sanjeev/",""],
+["Sagar Ghimire","","Cypher Technology","sagar@cyphertechnepal.com","cyphertechnepal.com","https://www.linkedin.com/in/saghimire/",""],
+["Dawan Minhajul Islam","Associate Pre-Sales","Dekko ISHO Technologies","minhaj@ditech.co","ditech.co","https://www.linkedin.com/in/dawan-minhajul-islam/",""],
+["Z R Shohag","Head of Sales","Dekko ISHO Technologies","shohag@ditech.co","ditech.co","https://www.linkedin.com/in/md-ziyaur-rahman-9177bb16b/",""],
+["Md. Abdullah Al Alif","Assistant Manager","DITECH","alif@ditech.co","ditech.co","https://www.linkedin.com/in/abdullahalalif/",""],
+["Neranjan Rathnayake","Network & Security Engineer","EDL","neranjan.rathnayake@edl.lk","edl.lk","https://www.linkedin.com/in/neranjanr/",""],
+["Srinivasan","Sales Professional","Eorbitor Technologies","srinivasanr@eorbitor.com","eorbitor.com","https://www.linkedin.com/in/krishnan-srinivasan-76071322/",""],
+["Leo Jude","Sales Manager","Eorbitor Technologies","leojude.j@eorbitor.com","eorbitor.com","https://www.linkedin.com/in/leo-jude-2892b546/",""],
+["Priyanka S","Key Account Executive","Eorbitor Technologies","priyanka.s@eorbitor.com","eorbitor.com","https://www.linkedin.com/in/priyanka-siva-32676b34b/",""],
+["Rajaram Khanolkar","Director Biz Dev","Equinox Software","rajaram@equinox-int.com","equinox-int.com","https://www.linkedin.com/in/rajaramkhanolkar/",""],
+["Sachin M Jadhav","IT Manager Network & Security","Hikal Ltd","sachin_jadhav@hikal.com","hikal.com","https://in.linkedin.com/in/sachin-jadhav-35548625",""],
+["Dhanushka Perera","Asst. Mgr. Info Security","HNB Life PLC","dhanushka.perera@hnblife.lk","hnblife.lk","https://www.linkedin.com/in/dhanushka-perera-42a54021/",""],
+["Abdulkadir Bohra","Network Engineer","Al Hutaib Computers","cse1@alhutaib.com","alhutaib.com","https://www.linkedin.com/in/abdulkadir-bohra-0007391a3/","Going"],
+["Ahmed Abozengra","Head of SOC","Almadar Aljadid","a.abozengra@almadar.ly","almadar.ly","",""],
+["Vinutha","Head of Info Security","Antares Systems","vinutha@anatressystems.com","antaressystems.com","",""],
+["Dushyant Kumar","Cyber Security","BlueEarth Softwares","dushyant.kumar@bcan.in","blueearthsoftwares.com","",""],
+["Md. Saddam Hossain","Senior Officer","Blue Pill Ltd","saddam.hossain@bluepill.com.bd","bluepill.com.bd","https://www.linkedin.com/in/saddam-hossain2/",""],
+["Akash Dev","Senior Executive","BRACNet Limited","akash@bracmail.net","bracnet.net","",""],
+["Pamudi","Info Security Engineer","Central Finance","pamudin@cf.lk","centralfinancetexas.com","https://www.linkedin.com/in/pamudi-navodya-10a4a2219",""],
+["Nashath Khan","Infosec Engineer Intern","Credo Technology Services","nashath.khan@credots.com","credots.com","https://www.linkedin.com/in/nashath-khan-394761206/","Going"],
+["Swati Gupta","IT Officer","ICFAI Business School","swati.icfai@rediffmail.com","ibsindia.org","https://www.linkedin.com/in/swati-gupta-15289624/","Going"],
+["Suman K Sharma","Managing Director","Insight Technology","suman@insighttechintl.com","insighttechintl.com","",""],
+["Dilshan Perera","Asst. Director (IT)","BOI","dilshanj@boi.lk","investsrilanka.com","https://www.linkedin.com/in/dilshan-perera-86035040",""],
+["Suneth Priyankara Hettiarachchi","Deputy Director","BOI","sunethh@boi.lk","investsrilanka.com","https://www.linkedin.com/in/suneth-hettiarachchi-6925591a",""],
+["Jaivindra Singh","IT Executive","Lakshmikumaran and Sridharan","jaivindra.singh@lakshmisri.com","lakshmisri.com","https://www.linkedin.com/in/jaivinder-singh-95597b111/",""],
+["Dhammika Guruge","Sr. Mgr. Network & Security","Lankapay","dhammika.guruge@lankapay.net","lankapay.net","https://www.linkedin.com/in/dhammika-guruge-64a1a174",""],
+["Roshan Bandara","Data Analysis","MBSL Bank","roshann@mbslbank.com","mbslbank.com","",""],
+["Lukos L","Head IT Security & Cloud","MetricStream","llukose@metricstream.com","metricstream.com","https://www.linkedin.com/in/llukos/",""],
+["K Dinesh","Cyber Security Specialist","Pan Asia Bank","dinesh.kanagarathnam@pabcbank.com","pabcbank.com","",""],
+["Dinesh Gamage","Asst. Mgr. – IT","Printcare PLC","dinesh.g@printcare.lk","printcare.lk","https://www.linkedin.com/in/dinesh-gamage-b74a88222",""],
+["Lakmal Jeewananda","Sr. Mgr. IT","Regional Development Bank","lakmaln@rdb.lk","rdb.lk","https://www.linkedin.com/in/lakmal-jeewananda-260620a",""],
+["Raghubir Singh","Head of IT","Relaxo Footwears","raghubirsingh@relaxofootwear.com","relaxofootwear.com","https://www.linkedin.com/in/raghubir-singh-cio-42840016/",""],
+["Duminda Idisooriya","Asst. Mgr. Info Security","Singer (Sri Lanka) PLC","dumindai@singersl.com","singersl.com","",""],
+["Dishan Siriwardana","Asst. Mgr. IT Infrastructure","Stretchline","dishan@stretchline.com","stretchline.com","",""],
+["Praveen Dehideniya","Sr. Mgr. IT Security","Union Bank of Colombo","praveend@unionb.com","unionb.com","https://www.linkedin.com/in/praveendehideniya",""],
+["Amruta Panchal","IT Security Analyst","Asfaleia Info Systems","amruta.p@asfaleiait.com","asfaleiait.com","https://www.linkedin.com/in/amruta-panchal-22a40128b/",""],
+["Aunkan Sen","Network Pre Sales Eng.","Blue Pill Ltd","aunkan@bluepill.com.bd","bluepill.com.bd","https://www.linkedin.com/in/aunkan-sen-9422b4303",""],
+["Deepak Kumar","Jr. Cloud Security Eng.","Cloud Workmates","deepak.k@cloudworkmates.com","cloudworkmates.com","https://www.linkedin.com/in/deepak-kumar-ab6810202",""],
+["Siddhalingesh Basawanal","Director IT & Compliance","Fintellix","siddhalingesh.basawanal@g2risksolutions.com","fintellix.com","https://www.linkedin.com/in/siddhalingesh-basawanal-7a3b3431/","Going"],
+["Saikumar Revankar","Enterprise Account Mgr.","Frontier Business Systems","saikumar@frontier.in","frontier.in","https://www.linkedin.com/in/saikumar-revankar-01006a119/",""],
+["Pratik Kadam","CISO","GICHF","pratik.kadam@gichf.com","sankalp.gichf.com","","Going"],
+["Yedlapalli Siva Subrahmanyam","Healthcare CIO","STAR Hospitals","siva.yedlapalli@starhospitals.co.in","starhospitals.in","https://www.linkedin.com/in/siva-subrahmanyam-yedlapalli-47060b298/","Going"],
+["Shoyeb Mirza","Head IT Infrastructure","Think360.ai","shoyeb.mirza@think360.ai","think360.ai","https://www.linkedin.com/in/mirza-shoyeb-baig-3a27511a0/","Going"],
+["Amey Mahadik","Associate VP","Avendus","amey.mahadik@avendus.com","avendus.com","https://www.linkedin.com/in/amey-mahadik-54729062/","Going"],
+["Soma Sekhar","Director of IT","Employ","som.turangi@employinc.com","employinc.com","https://www.linkedin.com/in/som9177893326/","Going"],
+["Vipil Gupta","Data Privacy & DPO","Indian Hotels Co. Ltd.","vipil.gupta@ihcltata.com","ihcltata.com","https://www.linkedin.com/in/vipilgupta/","Going"],
+["Jagannath","CISO & DPO","INOXGFL","jagannath.sahoo@gfl.co.in","inoxgfl.com","https://www.linkedin.com/in/dr-jagannath-sahoo-94880622/","Going"],
+["Jaspher","IT Operations Specialist","Jersey Engineering","jaspher@jerseyeng.com","jerseyeng.com","https://www.linkedin.com/in/jaspher-soundararaj-876097b/","Going"],
+["Abhijit Moharir","Group CIO","Kalyani Group","abhijit.moharir@kalyani.in","kalyanisteels.com","https://www.linkedin.com/in/abhijit-moharir-6291274/","Going"],
+["Vinay Kumar Sethi","Assistant Manager","PL Capital Group","vinaysethi@plindia.com","plindia.com","https://www.linkedin.com/in/vinay-sethi-a832bb56/","Going"],
+["Abhijit Pardeshi","Director IT","MDINetworx","abhijitp@mdinetworx.com","mdinetworx.com","https://www.linkedin.com/in/abhijit-pardeshi-12073b17/","Going"],
+["Dinesh MC","Product Analyst","Mystifly","dineshm@mystifly.com","mystifly.com","https://www.linkedin.com/in/dinesh-dinesh-01112a390/","Going"],
+["Tanmay Nehete","Senior IT Manager","SBI Securities","tanmay.nehete@sbicapsec.com","sbisecurities.in","https://www.linkedin.com/in/tanmay-nehete-ab98a548/","Going"],
+["Karin Lorez","CEO","ScaleCompliance","karin@scalecompliance.com","scalecompliance.com","https://www.linkedin.com/in/karin-lorez/","Going"],
+["MANASH KUMAR BARTHAKUR","Info Security & Compliance","Vendavo Technology","mbarthakur@vendavo.com","vendavo.com","https://www.linkedin.com/in/manash-barthakur-3b3b9a70/","Going"],
+["Shail Vardhan Singh","Sr. Mgr. IT Operations","Acidaes Solutions","shail.singh@businessnext.com","businessnext.com","https://www.linkedin.com/in/shail-vardhan-singh-37909a34a/","Going"],
+["Pavan","Head Info Security & DPO","IDfy","pavankumar.shukla@idfy.com","idfy.com","https://www.linkedin.com/in/pavankumar-shukla-06222913/",""],
+["Rajeev Anand","VP Information Technology","iEnergizer","rajeev.anand@ienergizer.com","ienergizer.com","https://www.linkedin.com/in/rajeev-anand-773aa11a/",""],
+["Prabodh Paunikar","CISO","InfraBeat Technologies","prabodh@infrabeat.com","infrabeat.com","https://www.linkedin.com/in/prabodh-paunikar-6921714/",""],
+["Aayush Sharma","Presale Engineer","Insight Technology","aayush@insighttechintl.com","insighttechintl.com","https://www.linkedin.com/in/aayush-sharma-6879b8229/",""],
+["MOHAMMAD RAYEES","Divisional CIO","ITC Infotech","mohammad.rayees@itcinfotech.com","itcinfotech.com","https://www.linkedin.com/in/mohammadrayees/",""],
+["Koustubh Rajwadkar","Senior Manager","Planet Retail","koustubh.rajwadkar@planetretail.in","planetretail.in","https://www.linkedin.com/in/koustubhrajwadkar/",""],
+["Ramit Kamboj","Global Head Enterprise IT","Varun Beverages","ramit.kamboj@rjcorp.in","rjcorp.in","https://www.linkedin.com/in/ramitkamboj/",""],
+["Sushil Mohapatra","CISO","SEDEMAC Mechatronics","sushil.mohapatra@sedemac.com","sedemac.com","https://www.linkedin.com/in/sushil-mohapatra-3091438/",""],
+["Suhas Deshmukh","India CIO & CISO","TRUMPF INDIA","suhas.deshmukh@trumpf.com","trumpf.com","https://linkedin.com/in/suhas-deshmukh-0130422b",""],
+["Biju K Thomas","Co-Founder & CRO","GLOCON Training","biju.kt@glocon.in","glocon.in","https://www.linkedin.com/in/biju-thomas-k/",""],
+["Keerthana Chokkaraju","Executive - SOC","TATA Advanced Systems","kchokkaraju@tasl.aero","tasl.aero","https://www.linkedin.com/in/keerthanachokkaraju/",""],
+["Chandima Wasalathanthri","Mgr. Enterprise Apps","Teejay","chandimaw@teejay.com","teejay.com","https://www.linkedin.com/in/chandima-wasalathanthri/",""],
+];
+const ib=document.getElementById('ireg');
+IR.forEach((r,i)=>{
+  const rv=r[6]==='Going'?'<span class="sg">Going</span>':'<span style="color:var(--text3);font-size:11px">—</span>';
+  const li=r[5]?`<a href="${r[5]}" target="_blank">↗</a>`:'—';
+  ib.innerHTML+=`<tr><td class="rn">${i+1}</td><td class="tdn">${r[0]}</td><td style="font-size:11px;color:var(--text3)">${r[1]||'—'}</td><td style="font-size:12px">${r[2]||'—'}</td><td><a href="mailto:${r[3]}" style="font-size:11px">${r[3]||'—'}</a></td><td style="font-size:11px;color:var(--text3)">${r[4]||'—'}</td><td>${li}</td><td>${rv}</td></tr>`;
+});
+
+const UA=[
+["Steve Holyoake","Managing Executive - MCA Risk","Tyme","stephen.holyoake@tyme.com","27 82 452 5202","https://www.linkedin.com/in/steve-holyoake-77716831/","12:30 PM","","RNR — shared with team"],
+["George Momtaz","CIO","Gemini Holding","gmomtaz@gemini-holding.com","","https://www.linkedin.com/in/george-momtaz-1588b054/","12:45 PM","",""],
+["Ahmad Muhammad","Software Engineering Mgr.","Cassbana","ahmed.hloul@cassbana.com","","https://www.linkedin.com/in/ahmad-muhammad-3a071021/","12:32 PM","",""],
+["Kiran Varma","Head of Compliance & MLRO","Crown Agents Bank","kiran.varma@crownagentsbank.com","971589998756","https://www.linkedin.com/in/kiran-varma-207ab2ab/","12:42 PM","","RNR / disconnected"],
+["Patrick Nakhle","Head of Technology","Global Gate Capital","pnakhle@globalgatecapital.com","9613972227","https://www.linkedin.com/in/patricknakhle/","12:32 PM","Nexuses Team","Sent email"],
+["Ayushri Asthana","Head of Operations","INGOT","a.asthana@ingotbrokers.com","971502031567","https://www.linkedin.com/in/ayushriasthana/","12:57 PM","Nexuses Team","Not Interested"],
+["Ahmed Abdelwahab","Inside Sales Manager","Qnet-Me","aabdelwahab@qnet-me.com","966536197594","https://www.linkedin.com/in/aabdelwahab369/","12:31 PM","Nexuses Team","Asked to send overview by mail"],
+["Nizar Mourad","IT Director","Cura Health Co.","nmurad@curakw.co","965922276898","https://www.linkedin.com/in/nizar-mourad-86308311/","12:33 PM","","RNR — out of Oman"],
+["Aftab","COO","Al Maryah Community Bank","aftab@mbankuae.com","971508702720","https://www.linkedin.com/in/aftab-s-54b6b815/","12:36 PM","","Voicemail sent / did not pick"],
+["Abdul Malek Mezher","SVP Group Head Compliance","Al Baraka Banking Group","amezher@albaraka.com","00966557206409","https://www.linkedin.com/in/abdul-malek-mezher-cams-cco-ccp-ica-icgc-grcp-csaa-aa85a413/","12:33 PM","","Connected | No response"],
+["Amira Ahmad","Acting Head, Financial Crime","Central Bank of UAE","amira.ahmad@cbuae.gov.ae","971504465956","http://www.linkedin.com/in/amira-ahmad-cams-4636a5110","12:35 PM","","Voicemail sent"],
+["Aneesh Varghese","Head of Operations","Al Madina Takaful","aneesh.varghese@almadinatakaful.com","96897442052","https://www.linkedin.com/in/aneesh-varghese-acii-chartered-insurer-5a683922/","12:45 PM","Nexuses Team","Out of Oman — connect on return"],
+["Athma Rai","Chief Risk & Compliance Officer","Al Fardan Exchange","athma.rai@alfardanexchange.com","971556622092","https://www.linkedin.com/in/athma-n-rai-cams-cgss-mlibf-ctfc-9b9a8115/","6:36","","RNR"],
+["Awais Mughal","Presales Engineer","Mobily","awais.khan@mobily.com.sa","","http://www.linkedin.com/in/awais-khan-917904175","12:54 PM","",""],
+["Aysha Zayani","Presales Engineer","Amiviz","aysha@amiviz.com","97150505546598","http://www.linkedin.com/in/aysha-hira-99a51247","12:34 PM","","Invalid number"],
+["Dave North","Chief Data Officer","Al Fardan Exchange","dave.north@alfardanexchange.com","","","12:57 PM","",""],
+["Gurpreet Kalra","COO","Aafaq Islamic Finance","gurpreet.kalra@aafaq.ae","971506331841","https://www.linkedin.com/in/gurpreet-kalra-4a736316/","6:42","",""],
+["JobbyJohnson","Head of Compliance","Samaa Finance","j.johnson@samaafinance.ae","971503554880","https://www.linkedin.com/in/jobbygeorgejohnson/","1:08 PM","","RNR / did not pick"],
+["Krishnan Hariharan","Chief Risk Officer","Al Salam Bank","k.hariharan@alsalambahrain.com","","https://www.linkedin.com/in/krishnan-hariharan-7ba1687/","12:45 PM","",""],
+["Kay Pindoria","COO & Financial Planner","Abacus Financial Consultants","k.pindoria@abacus.ae","971506809875","https://www.linkedin.com/in/kay-pindoria-dippfs-3a713a1a/","12:53","","RNR / voice mail"],
+["Michael Vessey","Chief Data Officer","Central Bank of UAE","michael.vessey@cbuae.gov.ae","971543134099","http://www.linkedin.com/in/vessey","12:24 PM","","RNR"],
+["Mohammed Al-Haddad","Head of Risk Management","Bank of Bahrain & Kuwait","mohammed.alhaddad@bbkonline.com","96599331444","http://www.linkedin.com/in/mohammed-al-haddad-0679a54a","12:28","","RNR / did not pick"],
+["David Noakes","COO","BSTG","noakes@bstg.ae","971501407311","http://www.linkedin.com/in/david-noakes-75193322","12:31 PM","","RNR"],
+["Tharanath Rai","COO","Al Fardan Exchange","rai.tharanath@alfardanexchange.com","971555989025","https://www.linkedin.com/in/tharanath-rai-2b0bb614/","12:26 PM","Nexuses Team","Not interested"],
+["Ravi Mehra","Group Head of Compliance","Ahli United","ravi.mehra@ahliunited.com","","https://www.linkedin.com/in/ravi-mehra-5a387076/","12:33 PM","",""],
+["Rawad Shaker","Head of Compliance","Al Sagr National Insurance","rawad.shaker@alsagrins.ae","","https://www.linkedin.com/in/rawad-shaker-066149220/","7:04","","Voicemail sent"],
+["Ryan Barrack","Director, Compliance","Central Bank of UAE","ryan.barrack@cbuae.gov.ae","971566161471","http://www.linkedin.com/in/ryan-barrack-cpa-42997620","1:20 PM","Nexuses Team","May meet — email details, call tomorrow"],
+["Sanjay Singh","Head of Compliance & AML","Al Ansari Exchange","sanjay.singh@alansari.ae","971504450954","https://www.linkedin.com/in/sanjay-singh-32602aa/","6:32","","Network issue / voice not clear"],
+["Sarabjit Anand","CIO","Central Bank of UAE","sarabjit.anand@cbuae.gov.ae","6586601648","http://www.linkedin.com/in/sarabjitanand","2:10","","RNR"],
+["Sarah Hoteit","Operations Executive","Nuummite","sarah@nuummite.com","","http://www.linkedin.com/in/sarah-hoteit","12:43 PM","",""],
+["Sunil Kumar","Software Engineering Mgr.","Verifone","sunil.kumar@verifone.com","","http://www.linkedin.com/in/sunil-kumar-b3651532","12:34 PM","",""],
+["Thabet Bakheet Khamis","Chief Risk Officer","Central Bank of UAE","thabet.bakheet@cbuae.gov.ae","","http://www.linkedin.com/in/thabetbakheet","12:01 PM","",""],
+["Tim Mallott","COO EMEA APAC","BGC Partners","tmallott@bgcpartners.com","","http://www.linkedin.com/in/tim-mallott-a0239792","12:56","",""],
+["Vikas Anand","Head of Operations","Al Etihad Payments","vikas.anand@aletihadpayments.ae","911141830497","https://www.linkedin.com/in/vikas-anand-452985a/","1:20 PM","Eguardian/Inventic Team","RNR"],
+["Wajeeha Awadh","Chief Digital Officer","Al Baraka Banking Group","wawadh@albaraka.com","","https://www.linkedin.com/in/wajeehaawadh/","12:30 PM","",""],
+["Maxime ADOKO","Head of Digital Banking","NSIA Banque","maxime.adoko@nsiabanque.com","","https://www.linkedin.com/in/maxime-adoko-2938b222b/","1:18 PM","",""],
+["Mohammed Alzaabi","Data Privacy Officer","Liva","mohammed.alzaabi@livainsurance.com","","https://www.linkedin.com/in/mohammed-alzaabi-48917a1b7/","","",""],
+["Karin Lorez","CEO","ScaleCompliance","karin@scalecompliance.com","","https://www.linkedin.com/in/karin-lorez/","","",""],
+["Swati Gupta","IT Officer","ICFAI Business School","swati.icfai@rediffmail.com","","","2:04","",""],
+["Raghavendra B","","","","","","12:28 PM","",""],
+["Rangaprasad","","","","","","12:28 PM","",""],
+];
+const ub=document.getElementById('uatt');
+UA.forEach((r,i)=>{
+  const li=r[5]?`<a href="${r[5]}" target="_blank">↗</a>`:'—';
+  const nc=r[8].includes('Not')||r[8].includes('Invalid')?'color:var(--red);font-size:11px':r[8].includes('meet')||r[8].includes('sent')?'color:var(--green);font-size:11px':'color:var(--text3);font-size:11px';
+  ub.innerHTML+=`<tr><td class="rn">${i+1}</td><td class="tdn">${r[0]}</td><td style="font-size:11px;color:var(--text3)">${r[1]||'—'}</td><td style="font-size:12px">${r[2]||'—'}</td><td><a href="mailto:${r[3]}" style="font-size:11px">${r[3]||'—'}</a></td><td class="tmn" style="font-size:11px">${r[4]||'—'}</td><td>${li}</td><td class="tmn" style="font-size:11px">${r[6]||'—'}</td><td style="font-size:11px;color:var(--text2)">${r[7]||'—'}</td><td style="${nc}">${r[8]||'—'}</td></tr>`;
+});
+</script>
+</body>
+</html>
